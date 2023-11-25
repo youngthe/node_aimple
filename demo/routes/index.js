@@ -20,32 +20,33 @@ router.post("/", async function (req, res, next) {
 
   let client = new Client();
 
-  try {
-
-    await client.connect({
-      host: "13.125.223.131",
-      port: 22,
-      user: "ubuntu",
-      privateKey : fs.readFileSync("key/hypercerts_fabric_1.ppk")
-    }).catch((err) => console.log(err));
-
-    await client.put("hello.txt", "/tmp/hello.txt")
-    res.status(200).json({
-      "result": true,
-      "message": "true"
-    });
-
-  } catch (err) {
-    console.log(err);
-    res.status(200).json({
-      "result": false,
-      "message": "error"
-    });
-  }
+  // try {
+  //
+  //   await client.connect({
+  //     host: "13.125.223.131",
+  //     port: 22,
+  //     user: "ubuntu",
+  //     privateKey : fs.readFileSync("key/hypercerts_fabric_1.ppk")
+  //   }).catch((err) => console.log(err));
+  //
+  //   await client.put("hello.txt", "/tmp/hello.txt")
+  //   res.status(200).json({
+  //     "result": true,
+  //     "message": "true"
+  //   });
+  //
+  // } catch (err) {
+  //   console.log(err);
+  //   res.status(200).json({
+  //     "result": false,
+  //     "message": "error"
+  //   });
+  // }
 
   try{
     const caInfo = ccp.certificateAuthorities['ca.example.com'];
     const caTLSCACerts = caInfo.tlsCACerts.pem;
+    const caUrl = "grpcs://13.125.218.10"
     const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
 
     const walletPath = path.join(__dirname, 'wallet');
