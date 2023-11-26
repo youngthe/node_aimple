@@ -19,11 +19,15 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.9.1",
-    "mysql": "^2.18.1",
+    "mysql": "^2.5.5",
+    "mysql2": "^3.6.5",
     "node-build": "^0.1.0",
     "nodemon": "^3.0.1",
     "rand-token": "^1.0.1",
     "shelljs": "^0.8.5",
     "ssh2-sftp-client": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
   }
 }

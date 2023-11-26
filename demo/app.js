@@ -45,5 +45,4 @@ const db = require('./database/db_connect');
 const jwt = require("./modules/jwt");
 db.connect();
 
-
 module.exports = app;

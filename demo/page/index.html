@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="../header/header.css">
+<link rel="stylesheet" href="main.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+    getCA();
+    function getCA(){
+
+        let httpRequest = new XMLHttpRequest();
+
+        httpRequest.open('GET', 'http://localhost:8080/tlsca/ca/list', true);
+        httpRequest.responseType = "json";
+        httpRequest.setRequestHeader('Content-Type', 'application/json');
+        httpRequest.send();
+
+        httpRequest.onreadystatechange = () => {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 200) {
+                    let result = httpRequest.response;
+                    for(let i = 0; i<result.list.length; i++){
+                        let row_1 = document.createElement('tr');
+                        let col1 = document.createElement('td');
+                        row_1.className="table-content";
+                        col1.innerHTML = "<input type=\"checkbox\" name=\"xxx\" value=\"yyy\">";
+                        row_1.appendChild(col1);
+
+                        let col2 = document.createElement('td');
+
+                        col2.innerHTML = result.list[i].id;
+                        row_1.appendChild(col2);
+
+                        let col3 = document.createElement('td');
+                        col3.innerHTML = result.list[i].net_group;
+                        row_1.appendChild(col3);
+
+                        let col4 = document.createElement('td');
+                        col4.innerHTML = result.list[i].create_time;
+                        row_1.appendChild(col4);
+
+                        let col5 = document.createElement('td');
+                        col5.innerHTML = result.list[i].role;
+                        row_1.appendChild(col5);
+
+
+                        document.getElementById('table').appendChild(row_1);
+
+                    }
+                    console.log(result);
+                } else {
+                    alert('서버 연결 오류');
+                }
+            }
+        };
+    }
+
+    function openSetting(){
+        if(document.getElementById('setting').style.display==='block'){
+            document.getElementById('setting').style.display='none';
+        }else{
+            document.getElementById('setting').style.display='block';
+        }
+    }
+
+    function logout(){
+        localStorage.clear();
+        location.href='../login/loginPage.html'
+    }
+
+</script>
+<body>
+
+<div class="header">
+    <input type="checkbox" id="icon">
+    <label for="icon">  <!--label은 인라인 스타일-->
+        <span></span>
+        <span></span>
+        <span></span>
+
+    </label>
+    <div id="menu">
+        <ul>
+            <li><a href="../ca/ca.html">  ca 관리 </a></li>
+        </ul>
+    </div>
+
+    <input class="logo" type="button" value="로고">
+    <input class="network" type="button" value="네트워크 상태">
+    <input type="button" class="profile" value="프로필" onclick="openSetting()">
+    <div id="setting">
+
+        <label onclick="logout()">로그아웃</label>
+    </div>
+
+
+</div>
+
+<div>
+    <div>
+        <table border="1" id="table">
+            <tr>
+                <td class="table-button" colspan="5" align="right">
+                    <input class="ca-button" type="button" value="추가" onclick="location.href='../ca/ca.html'">
+                    <input class="ca-button" type="button" value="삭제">
+                    <input class="ca-button" type="button" value="다운로드">
+                </td>
+            </tr>
+            <tr class="table-title">
+                <td width="50">☑</td>
+                <td width="100">id</td>
+                <td width="100">소속</td>
+                <td width="200">생성일</td>
+                <td width="200">role</td>
+            </tr>
+
+            <!--            <tr class="table-content">-->
+            <!--                <td><input type="checkbox" name="xxx" value="yyy"></td>-->
+            <!--                <td>admin</td>-->
+            <!--                <td>관리자</td>-->
+            <!--                <td>2023</td>-->
+            <!--                <td>관리자</td>-->
+            <!--            </tr>-->
+
+        </table>
+    </div>
+</div>
+</body>
+</html>

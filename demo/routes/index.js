@@ -16,6 +16,7 @@ const ccp = JSON.parse(ccpJSON);
 const cors = require('cors');
 router.use(cors({}));
 
+
 router.post("/", async function (req, res, next) {
 
   let client = new Client();
@@ -43,40 +44,61 @@ router.post("/", async function (req, res, next) {
   //   });
   // }
 
+  //1. admin 인증서가 발행되어 있지 않으면 인증서 발행
+  //2. 발행된 인증서를 사용하여 유저 생성
+
+
   try{
-    const caInfo = ccp.certificateAuthorities['ca.example.com'];
+    const caInfo = ccp.certificateAuthorities['ca.org1.example.com'];
     const caTLSCACerts = caInfo.tlsCACerts.pem;
-    const caUrl = "grpcs://13.125.218.10"
     const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
 
     const walletPath = path.join(__dirname, 'wallet');
     const wallet = await Wallets.newFileSystemWallet(walletPath);
 
-    let id = req.body.id;
-    let pw = req.body.pw;
+    db.query('select * from ca', async function (err, rows, field) {
+      if (!err) {
 
-    const adminExists = await wallet.get(id);
-    if (adminExists) {
-      console.log('An identity for the admin user "admin" already exists in the wallet');
-      res.status(200).json({
-        "result": false,
-        "message": "이미 존재하는 계정 입니다."
-      });
-      return;
-    }
+        for(let i=0;i<rows.length;i++){
 
-    const enrollment = await ca.enroll({ enrollmentID: id, enrollmentSecret: pw });
-    const x509Identity = {
-      credentials: {
-        certificate: enrollment.certificate,
-        privateKey: enrollment.key.toBytes(),
-      },
-      mspId: 'Org1MSP',
-      type: 'X.509',
-    };
+          const adminExists = await wallet.get(rows[i].id);
+          if (adminExists) {
+            console.log('An identity for the admin user "admin" already exists in the wallet');
+            res.status(200).json({
+              "result": false,
+              "message": "이미 존재하는 계정 입니다."
+            });
+            return;
+          }
 
-    await wallet.put(id, x509Identity);
-    console.log('Successfully enrolled and imported the identity of the admin user "admin"');
+          const enrollment = await ca.enroll({ enrollmentID: rows[i].id, enrollmentSecret: "test" });
+          const x509Identity = {
+            credentials: {
+              certificate: enrollment.certificate,
+              privateKey: enrollment.key.toBytes(),
+            },
+            mspId: 'Org1MSP',
+            type: 'X.509',
+          };
+          await wallet.put(rows[i].id, x509Identity);
+          console.log('Successfully enrolled and imported the identity of the admin user '+ rows[i].id);
+
+        }
+
+        res.status(200).json({
+          "result": true,
+          "list" : rows
+        });
+      } else {
+        res.status(200).json({
+          "result": false,
+          "message": "not match"
+        });
+      }
+
+    });
+
+
 
     res.status(200).json({
       "result": true,
@@ -105,31 +127,25 @@ router.post("/", async function (req, res, next) {
 
 });
 
-router.post('/test', function(req, res) {
+//인증서 생성
+router.post('/tlsca/ca/create', function(req, res) {
 
-  console.log("login");
+  console.log("/tlsca/ca/create");
   console.log(req.body);
 
-  db.query('select * from account', async function (err, rows, field) {
+  let user_id = req.body.id; //아이디
+  let group = req.body.group; //소속
+  let role = req.body.role; //권한 //admin, client, peer
+  let today = new Date();
+  let month = today.getMonth() + 1;
+  let date = today.getFullYear() + "/" + month + "/" +  today.getDate(); //현재 시간 ex) 2023/11/20
+
+  let query = "insert into `ca` (`id`, `net_group`, `create_time`, `role`) values ('"+user_id+"', '"+group+"', '"+date+"', '"+role+"');"
+  db.query(query, async function (err, rows, field) {
     if (!err) {
-      console.log(req.body.id);
-      if ((req.body.id === rows[0].id) && (req.body.pw === rows[0].pw)) {
-        const token = await jwt.sign(1);
-
-        console.log("token : " + token);
-
         res.status(200).json({
           "result": true,
-          "token" : token
         });
-      } else {
-        res.status(200).json({
-          "result": false,
-          "message": "not match"
-        });
-      }
-      // console.log(rows[0].id);
-
     } else {
       console.log('err : ' + err);
       res.status(200).json({
@@ -140,6 +156,76 @@ router.post('/test', function(req, res) {
 
   })
 
+});
+
+//인증서 리스트 조회
+router.get('/tlsca/ca/list', function(req, res) {
+
+  console.log("/tlsca/ca/list");
+
+  db.query('select * from ca', async function (err, rows, field) {
+    if (!err) {
+        res.status(200).json({
+          "result": true,
+          "list" : rows
+        });
+      } else {
+        res.status(200).json({
+          "result": false,
+          "message": "not match"
+        });
+      }
+      // console.log(rows[0].id);
+
+    });
+});
+
+//인증서 삭제
+router.delete('/tlsca/ca/delete/:pk', function(req, res) {
+
+  console.log(req.params.pk);
+
+  var number = req.params.pk;
+  let query = "delete from ca where pk = "+number;
+  db.query(query, async function (err, rows, field) {
+    if (!err) {
+      res.status(200).json({
+        "result": true,
+      });
+    } else {
+      res.status(200).json({
+        "result": false,
+        "message": "error"
+      });
+    }
+    // console.log(rows[0].id);
+
+  });
+});
+
+//인증서 업데이트 및 수정
+router.post('/tlsca/ca/update/:pk', function(req, res) {
+
+  console.log(req.params.pk);
+  console.log(req.body);
+  var number = req.params.pk;
+
+  let query = "update ca set id='"+req.body.id+"', net_group='"+req.body.group +"', role='"+req.body.role +"' where pk="+number;
+  console.log(query);
+  db.query(query, async function (err, rows, field) {
+    if (!err) {
+      res.status(200).json({
+        "result": true,
+      });
+    } else {
+      res.status(200).json({
+        "result": false,
+        "message": "error"
+      });
+    }
+    // console.log(rows[0].id);
+
+  });
 });
 
 router.get('/auth/ca/admin/logout', async function(req, res, next) {
