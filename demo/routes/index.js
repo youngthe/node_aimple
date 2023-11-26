@@ -56,56 +56,42 @@ router.post("/", async function (req, res, next) {
     const walletPath = path.join(__dirname, 'wallet');
     const wallet = await Wallets.newFileSystemWallet(walletPath);
 
+    const adminExists = await wallet.get('admin');
+
+    if (!adminExists) {
+      console.log('An identity for the admin user "admin" already exists in the wallet');
+      const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+      const x509Identity = {
+        credentials: {
+          certificate: enrollment.certificate,
+          privateKey: enrollment.key.toBytes(),
+        },
+        mspId: 'Org1MSP',
+        type: 'X.509',
+      };
+      await wallet.import('admin', x509Identity);
+    }
+
     db.query('select * from ca', async function (err, rows, field) {
       if (!err) {
 
+        const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+        const x509Identity = {
+          credentials: {
+            certificate: enrollment.certificate,
+            privateKey: enrollment.key.toBytes(),
+          },
+          mspId: 'Org1MSP',
+          type: 'X.509',
+        };
+
         for(let i=0;i<rows.length;i++){
 
-          const adminExists = await wallet.get('admin');
-
-          if (!adminExists) {
-            console.log('An identity for the admin user "admin" already exists in the wallet');
-            const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
-            const x509Identity = {
-              credentials: {
-                certificate: enrollment.certificate,
-                privateKey: enrollment.key.toBytes(),
-              },
-              mspId: 'Org1MSP',
-              type: 'X.509',
-            };
-            await wallet.put('admin', x509Identity);
+          const userExists = await wallet.get(rows[i].id);
+          if(userExists){
+            await wallet.import(rows[i].id, x509Identity);
           }
 
-          const ca = new FabricCAServices(caInfo.url, {
-            trustedRoots: caTLSCACerts,
-            verify: false,
-          }, caInfo.name);
-          const walletPath = path.join(__dirname, 'wallet');
-          const wallet = await Wallets.newFileSystemWallet(walletPath);
-
-          console.log(rows[i].id);
-          const userId = rows[i].id;
-          const adminId = 'admin';
-          const adminIdentity = await wallet.get(adminId);
-          const enrollment = await ca.enroll({
-            enrollmentID: userId,
-            enrollmentSecret: userId + "pw",
-            attrs: [{ name: 'role', value: rows[i].role, ecert: true }],
-          }, adminIdentity);
-
-
-          const x509Identity = {
-            credentials: {
-              certificate: enrollment.certificate,
-              privateKey: enrollment.key.toBytes(),
-            },
-            mspId: caInfo.mspid,
-            type: 'X.509',
-          };
-
-          await wallet.put(userId, x509Identity);
-          console.log(`Successfully enrolled user ${userId} and imported it into the wallet`);
         }
 
         res.status(200).json({
