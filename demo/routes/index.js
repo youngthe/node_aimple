@@ -3,13 +3,13 @@ const db = require('../database/db_connect');
 var router = express.Router();
 const jwt = require('../modules/jwt');
 const shell = require('shelljs');
-const Client = require('ssh2-sftp-client');
+//const Client = require('ssh2-sftp-client');
 const path = require("path");
 
 const { Wallets, Gateway } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const fs = require("fs");
-const ccpPath = path.resolve('/home/user/fabric-samples', '..', '..', 'first-network', 'connection-org1.json');
+const ccpPath = path.resolve('/home/first-network/connection-org1.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
@@ -19,7 +19,7 @@ router.use(cors({}));
 
 router.post("/", async function (req, res, next) {
 
-  let client = new Client();
+  //let client = new Client();
 
   // try {
   //
@@ -61,34 +61,58 @@ router.post("/", async function (req, res, next) {
 
         for(let i=0;i<rows.length;i++){
 
-          const adminExists = await wallet.get(rows[i].id);
-          if (adminExists) {
+          const adminExists = await wallet.get('admin');
+
+          if (!adminExists) {
             console.log('An identity for the admin user "admin" already exists in the wallet');
-            res.status(200).json({
-              "result": false,
-              "message": "이미 존재하는 계정 입니다."
-            });
-            return;
+            const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+            const x509Identity = {
+              credentials: {
+                certificate: enrollment.certificate,
+                privateKey: enrollment.key.toBytes(),
+              },
+              mspId: 'Org1MSP',
+              type: 'X.509',
+            };
+            await wallet.put('admin', x509Identity);
           }
 
-          const enrollment = await ca.enroll({ enrollmentID: rows[i].id, enrollmentSecret: "test" });
+          const ca = new FabricCAServices(caInfo.url, {
+            trustedRoots: caTLSCACerts,
+            verify: false,
+          }, caInfo.name);
+          const walletPath = path.join(__dirname, 'wallet');
+          const wallet = await Wallets.newFileSystemWallet(walletPath);
+
+          console.log(rows[i].id);
+          const userId = rows[i].id;
+          const adminId = 'admin';
+          const adminIdentity = await wallet.get(adminId);
+          const enrollment = await ca.enroll({
+            enrollmentID: userId,
+            enrollmentSecret: userId + "pw",
+            attrs: [{ name: 'role', value: rows[i].role, ecert: true }],
+          }, adminIdentity);
+
+
           const x509Identity = {
             credentials: {
               certificate: enrollment.certificate,
               privateKey: enrollment.key.toBytes(),
             },
-            mspId: 'Org1MSP',
+            mspId: caInfo.mspid,
             type: 'X.509',
           };
-          await wallet.put(rows[i].id, x509Identity);
-          console.log('Successfully enrolled and imported the identity of the admin user '+ rows[i].id);
 
+          await wallet.put(userId, x509Identity);
+          console.log(`Successfully enrolled user ${userId} and imported it into the wallet`);
         }
 
         res.status(200).json({
           "result": true,
           "list" : rows
         });
+
       } else {
         res.status(200).json({
           "result": false,
