@@ -1,0 +1,90 @@
+{
+    "name": "first-network-org1",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org1",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org1.example.com",
+                "peer1.org1.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org1.example.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.org1.example.com": {
+            "url": "grpcs://localhost:7051",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICVjCCAf2gAwIBAgIQUXKur3ErQlHyxSaplAvkyjAKBggqhkjOPQQDAjB2MQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEfMB0GA1UEAxMWdGxz\nY2Eub3JnMS5leGFtcGxlLmNvbTAeFw0yMDA1MDIxMTI5MDBaFw0zMDA0MzAxMTI5\nMDBaMHYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQH\nEw1TYW4gRnJhbmNpc2NvMRkwFwYDVQQKExBvcmcxLmV4YW1wbGUuY29tMR8wHQYD\nVQQDExZ0bHNjYS5vcmcxLmV4YW1wbGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0D\nAQcDQgAEARL4LD3hoQCBEgy/xUfw2z2EIcpIPTmrWBO1uXK37Rxzr+0vZjcV0BPH\nto8UD7xzdaZiQf+OuUBVZD629PDvgqNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1Ud\nJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1Ud\nDgQiBCDDhBd3hCqgRFlelMOjpLBzbTD4aaT5HiuE23XqY3pCqzAKBggqhkjOPQQD\nAgNHADBEAiAjppOo7ADCwotMqEoF2/jS3GuglESUDOOIFS1TsDphJwIgEWuK9FLb\nQuQhxCJBkht2Wnywgr3ygIY/X1e7CtMP0Ko=\n-----END CERTIFICATE-----\n"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org1.example.com",
+                "hostnameOverride": "peer0.org1.example.com"
+            }
+        },
+        "peer1.org1.example.com": {
+            "url": "grpcs://localhost:8051",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICVjCCAf2gAwIBAgIQUXKur3ErQlHyxSaplAvkyjAKBggqhkjOPQQDAjB2MQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEfMB0GA1UEAxMWdGxz\nY2Eub3JnMS5leGFtcGxlLmNvbTAeFw0yMDA1MDIxMTI5MDBaFw0zMDA0MzAxMTI5\nMDBaMHYxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQH\nEw1TYW4gRnJhbmNpc2NvMRkwFwYDVQQKExBvcmcxLmV4YW1wbGUuY29tMR8wHQYD\nVQQDExZ0bHNjYS5vcmcxLmV4YW1wbGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0D\nAQcDQgAEARL4LD3hoQCBEgy/xUfw2z2EIcpIPTmrWBO1uXK37Rxzr+0vZjcV0BPH\nto8UD7xzdaZiQf+OuUBVZD629PDvgqNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1Ud\nJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1Ud\nDgQiBCDDhBd3hCqgRFlelMOjpLBzbTD4aaT5HiuE23XqY3pCqzAKBggqhkjOPQQD\nAgNHADBEAiAjppOo7ADCwotMqEoF2/jS3GuglESUDOOIFS1TsDphJwIgEWuK9FLb\nQuQhxCJBkht2Wnywgr3ygIY/X1e7CtMP0Ko=\n-----END CERTIFICATE-----\n"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.org1.example.com",
+                "hostnameOverride": "peer1.org1.example.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org1.hypercerts.com": {
+            "url": "https://13.125.218.10:10054",
+            "caName": "ca-org1",
+            "tlsCACerts": {
+                "pem": "empty"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.org2.hypercerts.com": {
+            "url": "https://13.125.218.10:9054",
+            "caName": "ca-org1",
+            "tlsCACerts": {
+                "pem": "empty"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.orderer.hypercerts.com": {
+            "url": "https://13.125.218.10:8054",
+            "caName": "ca-org1",
+            "tlsCACerts": {
+                "pem": "empty"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.tls.hypercerts.com": {
+            "url": "https://13.125.218.10:7054",
+            "caName": "ca-tls",
+            "tlsCACerts": {
+                "pem": "empty"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}
