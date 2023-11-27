@@ -6,8 +6,6 @@ const shell = require('shelljs');
 //const Client = require('ssh2-sftp-client');
 const path = require("path");
 
-const { Wallets, Gateway } = require('fabric-network');
-const FabricCAServices = require('fabric-ca-client');
 const fs = require("fs");
 const ccpPath = path.resolve('./config/connection-org1.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
@@ -16,34 +14,9 @@ const ccp = JSON.parse(ccpJSON);
 const cors = require('cors');
 router.use(cors({}));
 
-
 //인증서 등록 및 발급
 router.post("/tlsca/ca/approval", async function (req, res, next) {
 
-  //let client = new Client();
-
-  // try {
-  //
-  //   await client.connect({
-  //     host: "13.125.223.131",
-  //     port: 22,
-  //     user: "ubuntu",
-  //     privateKey : fs.readFileSync("key/hypercerts_fabric_1.ppk")
-  //   }).catch((err) => console.log(err));
-  //
-  //   await client.put("hello.txt", "/tmp/hello.txt")
-  //   res.status(200).json({
-  //     "result": true,
-  //     "message": "true"
-  //   });
-  //
-  // } catch (err) {
-  //   console.log(err);
-  //   res.status(200).json({
-  //     "result": false,
-  //     "message": "error"
-  //   });
-  // }
 
 
   try{
@@ -59,135 +32,111 @@ router.post("/tlsca/ca/approval", async function (req, res, next) {
       return;
     }
 
-    const caInfo_tls = ccp.certificateAuthorities['ca.tls.hypercerts.com'];
-    const caInfo_org1 = ccp.certificateAuthorities['ca.org1.hypercerts.com'];
-    const caInfo_org2 = ccp.certificateAuthorities['ca.org2.hypercerts.com'];
-    const caInfo_orderer = ccp.certificateAuthorities['ca.orderer.hypercerts.com'];
+    //
+    // const newUser = await ca_org1.register(enrollment, adminIdentity);
+    // console.log(`User ${enrollmentID} registered successfully!`);
+    // console.log(`Secret: ${newUser}`);
+    // db.query('select * from ca', async function (err, rows, field) {
+    //   if (!err) {
+    //     for(let i=0;i<rows.length;i++){
+    //
+    //       if(rows[i].net_group === "tls"){
+    //         console.log("tls");
+    //
+    //         const enrollment = await ca_tls.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
+    //         const x509Identity = {
+    //           credentials: {
+    //             certificate: enrollment.certificate,
+    //             privateKey: enrollment.key.toBytes(),
+    //           },
+    //           roles: rows[i].role,
+    //           mspId: 'Org1MSP',
+    //           type: 'X.509',
+    //         };
+    //
+    //         await wallet.put(rows[i].id, x509Identity);
+    //
+    //       }else if(rows[i].net_group === "org1"){
+    //
+    //         console.log("org1");
+    //
+    //         const enrollment = await ca_org1.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
+    //         const x509Identity = {
+    //           credentials: {
+    //             certificate: enrollment.certificate,
+    //             privateKey: enrollment.key.toBytes(),
+    //           },
+    //           roles: rows[i].role,
+    //           mspId: 'Org1MSP',
+    //           type: 'X.509',
+    //         };
+    //
+    //         await wallet.put(rows[i].id, x509Identity);
+    //
+    //       }else if(rows[i].net_group === "org2"){
+    //
+    //         console.log("org2");
+    //
+    //         const userExists = await wallet.get(rows[i].id);
+    //         if(!userExists){
+    //
+    //           const enrollment = await ca_org2.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
+    //
+    //           const x509Identity = {
+    //             credentials: {
+    //               certificate: enrollment.certificate,
+    //               privateKey: enrollment.key.toBytes(),
+    //             },
+    //             roles: rows[i].role,
+    //             mspId: 'Org1MSP',
+    //             type: 'X.509',
+    //           };
+    //
+    //           await wallet.put(rows[i].id, x509Identity);
+    //         }
+    //
+    //       }else{
+    //
+    //         console.log("orderer");
+    //
+    //         const userExists = await wallet.get(rows[i].id);
+    //         if(!userExists){
+    //
+    //           const enrollment = await ca_orderer.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
+    //
+    //           const x509Identity = {
+    //             credentials: {
+    //               certificate: enrollment.certificate,
+    //               privateKey: enrollment.key.toBytes(),
+    //             },
+    //             roles: rows[i].role,
+    //             mspId: 'Org1MSP',
+    //             type: 'X.509',
+    //           };
+    //
+    //           await wallet.put(rows[i].id, x509Identity);
+    //
+    //         }
+    //
+    //       }
+    //
+    //     }
+    //
 
-    const ca_tls = new FabricCAServices(caInfo_tls.url, { trustedRoots: caInfo_tls.tlsCACerts.pem, verify: false }, caInfo_tls.caName);
-    const ca_org1 = new FabricCAServices(caInfo_org1.url, { trustedRoots: caInfo_org1.tlsCACerts.pem, verify: false }, caInfo_org1.caName);
-    const ca_org2 = new FabricCAServices(caInfo_org2.url, { trustedRoots: caInfo_org2.tlsCACerts.pem, verify: false }, caInfo_org2.caName);
-    const ca_orderer = new FabricCAServices(caInfo_orderer.url, { trustedRoots: caInfo_orderer.tlsCACerts.pem, verify: false }, caInfo_orderer.caName);
+    shell.exec('node registerUser.js');
 
-    const walletPath = path.join(__dirname, 'wallet');
-    const wallet = await Wallets.newFileSystemWallet(walletPath);
-
-    db.query('select * from ca', async function (err, rows, field) {
-      if (!err) {
-        for(let i=0;i<rows.length;i++){
-
-          if(rows[i].net_group === "tls"){
-            console.log("tls");
-
-            const enrollment = await ca_tls.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
-            const x509Identity = {
-              credentials: {
-                certificate: enrollment.certificate,
-                privateKey: enrollment.key.toBytes(),
-              },
-              roles: rows[i].role,
-              mspId: 'Org1MSP',
-              type: 'X.509',
-            };
-
-            await wallet.put(rows[i].id, x509Identity);
-
-          }else if(rows[i].net_group === "org1"){
-
-            console.log("org1");
-
-            const enrollment = await ca_org1.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
-            const x509Identity = {
-              credentials: {
-                certificate: enrollment.certificate,
-                privateKey: enrollment.key.toBytes(),
-              },
-              roles: rows[i].role,
-              mspId: 'Org1MSP',
-              type: 'X.509',
-            };
-
-            await wallet.put(rows[i].id, x509Identity);
-
-          }else if(rows[i].net_group === "org2"){
-
-            console.log("org2");
-
-            const userExists = await wallet.get(rows[i].id);
-            if(!userExists){
-
-              const enrollment = await ca_org2.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
-
-              const x509Identity = {
-                credentials: {
-                  certificate: enrollment.certificate,
-                  privateKey: enrollment.key.toBytes(),
-                },
-                roles: rows[i].role,
-                mspId: 'Org1MSP',
-                type: 'X.509',
-              };
-
-              await wallet.put(rows[i].id, x509Identity);
-            }
-
-          }else{
-
-            console.log("orderer");
-
-            const userExists = await wallet.get(rows[i].id);
-            if(!userExists){
-
-              const enrollment = await ca_orderer.enroll({ enrollmentID: rows[i].id, enrollmentSecret: rows[i].id + "pw"});
-
-              const x509Identity = {
-                credentials: {
-                  certificate: enrollment.certificate,
-                  privateKey: enrollment.key.toBytes(),
-                },
-                roles: rows[i].role,
-                mspId: 'Org1MSP',
-                type: 'X.509',
-              };
-
-              await wallet.put(rows[i].id, x509Identity);
-
-            }
-
-          }
-
-        }
-
-        res.status(200).json({
-          "result": true,
-        });
-      } else {
-        res.status(400).json({
-          "result": false,
-          "message": "db error"
-        });
-      }
-
+    res.status(200).json({
+      "result": true,
     });
 
   }catch (err){
-    console.log(err);
+    console.log(err)
     res.status(400).json({
       "result": false,
       "message": "error"
     });
   }
 
-
-
-  // console.log(c);
-
-  // shell.cd('~');
-  // if(shell.exec('ls -al').code !== 0){
-  //   shell.echo('error: command failed');
-  //   shell.exist(1);
-  // }
-  //
 
 
 });

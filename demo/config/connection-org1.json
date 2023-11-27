@@ -1,7 +1,7 @@
 {
     "name": "first-network-org1",
     "version": "1.0.0",
-    "client": {
+    "clien:t": {
         "organization": "Org1",
         "connection": {
             "timeout": {
@@ -47,10 +47,10 @@
     },
     "certificateAuthorities": {
         "ca.org1.hypercerts.com": {
-            "url": "https://13.125.218.10:10054",
+            "url": "https://13.125.218.10:8054",
             "caName": "ca-org1",
             "tlsCACerts": {
-                "pem": "empty"
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICjjCCAjSgAwIBAgIUajY5HQ+KbfnYTwwlcYQ6Ofas40wwCgYIKoZIzj0EAwIw\nXjELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRQwEgYDVQQK\nEwtIeXBlcmxlZGdlcjEPMA0GA1UECxMGRmFicmljMQ8wDQYDVQQDEwZjYS10bHMw\nHhcNMjMxMDE5MTYwNDAwWhcNMjgxMTE4MDgwOTAwWjBuMQswCQYDVQQGEwJVUzEX\nMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExDzANBgNVBAcTBkR1cmhhbTETMBEGA1UE\nChMKaHlwZXJjZXJ0czEPMA0GA1UECxMGY2xpZW50MQ8wDQYDVQQDEwZvcmcxY2Ew\nWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATZ+nk9Ao3honQ0H9epWEf925bcKDtG\ngmvvYq+3++/4Ll56sH/tL95MX0GSPTH7eqoTyF8yn+N72G+7oV7fgEWBo4G/MIG8\nMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBRf0lnG\nzGG8AZT5qDj9x3wyk6tecTAfBgNVHSMEGDAWgBT3K3Xk4XQoCl2AF/jvtO0KxJoL\nIDBZBggqAwQFBgcIAQRNeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhm\nLkVucm9sbG1lbnRJRCI6Im9yZzFjYSIsImhmLlR5cGUiOiJjbGllbnQifX0wCgYI\nKoZIzj0EAwIDSAAwRQIhAO1Nl33QfvXRde1gZdDc9qyhtSmaU2WChOJcb+L1Uk9w\nAiBoV4G2G2eCRYArb+551dRuozk5rYEYA8w0Lud3IKctTg==\n-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\nMIICAzCCAamgAwIBAgIUS1SadNZhe78HMNLWmzXYDwKQE6YwCgYIKoZIzj0EAwIw\nXjELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRQwEgYDVQQK\nEwtIeXBlcmxlZGdlcjEPMA0GA1UECxMGRmFicmljMQ8wDQYDVQQDEwZjYS10bHMw\nHhcNMjMxMDE5MTYwNDAwWhcNMzgxMDE1MTYwNDAwWjBeMQswCQYDVQQGEwJVUzEX\nMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8w\nDQYDVQQLEwZGYWJyaWMxDzANBgNVBAMTBmNhLXRsczBZMBMGByqGSM49AgEGCCqG\nSM49AwEHA0IABHxN807EUIikpiMx9Dy3Oaj7j+MUpoBlD3NAksOyBCwY6O0byJNl\nessXhbWh5uzjitKmHd6np+kvhcQBrkI9r4OjRTBDMA4GA1UdDwEB/wQEAwIBBjAS\nBgNVHRMBAf8ECDAGAQH/AgEBMB0GA1UdDgQWBBT3K3Xk4XQoCl2AF/jvtO0KxJoL\nIDAKBggqhkjOPQQDAgNIADBFAiEAt88Aab/lIld+1UkyWt/mvXhFYR2sS3yF3Pq2\n8oCDwnkCIBDeZ0mZNraCc7A71LAw6xZVGmgr/uunlWupK6k4XKkB\n-----END CERTIFICATE-----"
             },
             "httpOptions": {
                 "verify": false
@@ -58,7 +58,7 @@
         },
         "ca.org2.hypercerts.com": {
             "url": "https://13.125.218.10:9054",
-            "caName": "ca-org1",
+            "caName": "ca-org2",
             "tlsCACerts": {
                 "pem": "empty"
             },
@@ -67,8 +67,8 @@
             }
         },
         "ca.orderer.hypercerts.com": {
-            "url": "https://13.125.218.10:8054",
-            "caName": "ca-org1",
+            "url": "https://13.125.218.10:10054",
+            "caName": "ca-orderer",
             "tlsCACerts": {
                 "pem": "empty"
             },
@@ -80,7 +80,7 @@
             "url": "https://13.125.218.10:7054",
             "caName": "ca-tls",
             "tlsCACerts": {
-                "pem": "empty"
+                "pem": "-----BEGIN CERTIFICATE-----\nMIIB4TCCAYegAwIBAgIUHfHjDLBMlcYwby65M2jur8O8+CIwCgYIKoZIzj0EAwIw\nXjELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRQwEgYDVQQK\nEwtIeXBlcmxlZGdlcjEPMA0GA1UECxMGRmFicmljMQ8wDQYDVQQDEwZjYS10bHMw\nHhcNMjMxMDE5MTYwNDAwWhcNMjQxMTI2MDMyMTAwWjAhMQ8wDQYDVQQLEwZjbGll\nbnQxDjAMBgNVBAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9mfJ\nYDA17Vc/E2S4TzAqYPHjU91pcWOej99srNsbZQHtgKL4aNlU6O7AXiUrWDpSI5R9\nW3ptQ2d4ipbfnqOmXKNgMF4wDgYDVR0PAQH/BAQDAgeAMAwGA1UdEwEB/wQCMAAw\nHQYDVR0OBBYEFEZvoJUUJU++qMTT22czQL4vltOeMB8GA1UdIwQYMBaAFPcrdeTh\ndCgKXYAX+O+07QrEmgsgMAoGCCqGSM49BAMCA0gAMEUCIQCA/KobEJc6JAIrigB2\n2qVPjZN7UWHI5kFte0Qh0BieAQIgNfri+kninJzP3SX6xilXuoQN+hUZi+Zu2OMh\nZZ9ueTs=\n-----END CERTIFICATE-----\n"
             },
             "httpOptions": {
                 "verify": false
