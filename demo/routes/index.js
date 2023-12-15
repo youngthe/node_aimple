@@ -114,29 +114,104 @@ router.post('/tlsca/node/create', async function(req, res) {
     let port = req.body.port; //권한 client, peer
     let today = new Date();
     let month = today.getMonth() + 1;
-    let date = today.getFullYear() + "/" + month + "/" +  today.getDate(); //현재 시간 ex) 2023/11/20
+    let date = today.getFullYear() + "/" + month + "/" + today.getDate(); //현재 시간 ex) 2023/11/20
 
     pw = cipher(pw);
 
-    let query = "insert into node (`id`,`pw`,`organization`,`role`,`create_time`, `ca_name`, `port`) values ('"+id+"','"+pw+"','"+organization+"','"+role+"','"+date+"','"+ca_name+"','"+port+"')";
-    console.log(query);
-    db.query(query, async function (err, rows, field) {
-      if (!err) {
-        res.status(200).json({
-          "result": true,
-        });
-      } else {
-        console.log('err : ' + err);
+    let checkQuery = "select * from node where id='"+id+"' and ca_name='" + ca_name +"' and organization ='" + organization + "'";
+    db.query(checkQuery, async function (err, rows, field) {
+
+      if(rows.length !== 0){
         res.status(400).json({
-          "result": false,
-          "message": "error"
+          "result": true,
+          "message" : "이미 해당 노드가 존재합니다."
         });
+      }else{
+
+        let query = "insert into node (`id`,`pw`,`organization`,`role`,`create_time`, `ca_name`, `port`) values ('"+id+"','"+pw+"','"+organization+"','"+role+"','"+date+"','"+ca_name+"','"+port+"')";
+        console.log(query);
+        db.query(query, async function (err, rows, field) {
+
+          if (!err) {
+
+            db.query('SELECT LAST_INSERT_ID() as id from node', function (error, results, fields) {
+              if (error) throw error;
+              const autoIncrementValue = results[0].id;
+
+              res.status(200).json({
+                "result": true,
+                "pk": autoIncrementValue
+
+              });
+            });
+          }else {
+            console.log('err : ' + err);
+            res.status(400).json({
+              "result": false,
+              "message": "error"
+            });
+          }
+        })
       }
     })
   }catch (err){
     console.log(err);
   }
+});
 
+//노드 삭제
+router.delete('/tlsca/node/delete/:pk', async function(req, res) {
+
+  let token = req.headers.token;
+
+  const result = await jwt.verify(token); // verify 함수 호출
+  if(result < 0){
+    res.status(401).json({
+      "result": false,
+      "message" : "invalid token"
+    });
+    return;
+  }
+
+  try{
+    let selectQuery = "select * from node where pk='"+req.body.list[i]+"'";
+    db.query(selectQuery, async function (err, rows, field) {
+
+      if (err) {
+        console.log('err : ' + err);
+        res.status(200).json({
+          "result": false,
+          "message": "error"
+        });
+      }else{
+        let ca_name_origin = rows[0].ca_name.split("-");
+        shell.exec('/work/hypercerts-network/organizations/fabric-ca/node/deleteCert.sh ' + rows[0].id + " " + rows[0].organization + " " + ca_name_origin[1]);
+      }
+    })
+
+
+    for(let i = 0;i < req.body.list.length;i++){
+
+      let query = "delete from node where pk='"+req.body.list[i]+"'";
+      db.query(query, async function (err, rows, field) {
+
+        if (err) {
+          console.log('err : ' + err);
+          res.status(200).json({
+            "result": false,
+            "message": "error"
+          });
+        }
+      })
+    }
+
+    res.status(200).json({
+      "result": true,
+    });
+
+  }catch (err){
+    console.log(err);
+  }
 });
 
 //인증서 생성
