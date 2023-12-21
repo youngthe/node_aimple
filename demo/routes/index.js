@@ -56,7 +56,7 @@ router.get('/', async function(req, res) {
 
 //노드 조회
 //node 리스트 조회
-router.get('/tlsca/node/list', async function(req, res) {
+router.get('/tlsca/node/list/:order', async function(req, res) {
 
   console.log("/tlsca/node/list");
   let token = req.headers.token;
@@ -70,7 +70,10 @@ router.get('/tlsca/node/list', async function(req, res) {
     return;
   }
 
-  db.query('select * from node order by organization ASC', async function (err, rows, field) {
+  let order = req.params.order;
+
+  let query = "select * from node order by " + order +" ASC"
+  db.query(query, async function (err, rows, field) {
     if (!err) {
       console.log(rows);
       res.status(200).json({
@@ -108,10 +111,10 @@ router.post('/tlsca/node/create', async function(req, res) {
 
     let id = req.body.id; //아이디
     let pw = req.body.password; //비밀번호
-    let ca_name = req.body.ca_name;
-    let organization = req.body.organization; //ca 이름
-    let role = req.body.role; //권한 client, peer
-    let port = req.body.port; //권한 client, peer
+    let ca_name = req.body.ca_name; //ca 이름
+    let organization = req.body.organization; //조직 명
+    let role = req.body.role; //권한 peer, admin
+    let port = req.body.port; //포트
     let today = new Date();
     let month = today.getMonth() + 1;
     let date = today.getFullYear() + "/" + month + "/" + today.getDate(); //현재 시간 ex) 2023/11/20
@@ -184,11 +187,9 @@ router.delete('/tlsca/node/delete/:pk', async function(req, res) {
           "message": "error"
         });
       }else{
-        let ca_name_origin = rows[0].ca_name.split("-");
-        shell.exec('/work/hypercerts-network/organizations/fabric-ca/node/deleteCert.sh ' + rows[0].id + " " + rows[0].organization + " " + ca_name_origin[1]);
+        shell.exec('/work/node/deleteCert.sh ' + rows[0].id + " " + rows[0].organization);
       }
     })
-
 
     for(let i = 0;i < req.body.list.length;i++){
 
@@ -230,14 +231,13 @@ router.post('/tlsca/certificate/create', async function(req, res) {
 
     for(let i = 0;i < req.body.list.length;i++){
 
-      let query = "select * from node where pk='"+req.body.list[i]+"'";
+      let query = "select * from node where pk='"+req.params.pk+"'";
       db.query(query, async function (err, rows, field) {
 
         if (!err) {
           let pw = decipher(rows[0].pw);
-          let ca_name_origin = rows[0].ca_name.split("-");
-          console.log('/work/hypercerts-network/organizations/fabric-ca/node/webEnrollScript.sh ' +rows[0].role+ " "+ rows[0].id + " "+ pw + " " + rows[0].ca_name + " " + rows[0].port + " " + ca_name_origin[1] +" " + rows[0].organization);
-          shell.exec('/work/hypercerts-network/organizations/fabric-ca/node/webEnrollScript.sh ' +rows[0].role+ " "+ rows[0].id + " "+ pw +" " + rows[0].ca_name + " " + rows[0].port + " " + ca_name_origin[1] + " " + rows[0].organization);
+          console.log('/work/node/webEnrollScript.sh ' +rows[0].role+ " "+ rows[0].id + " "+ pw + " " + rows[0].ca_name + " " + rows[0].port +" " + rows[0].organization);
+          shell.exec('/work/node/webEnrollScript.sh ' +rows[0].role+ " "+ rows[0].id + " "+ pw +" " + rows[0].ca_name + " " + rows[0].port + " " + rows[0].organization);
         }
         else {
           console.log('err : ' + err);
@@ -321,6 +321,33 @@ router.get('/tlsca/deploy', async function(req, res) {
     });
   }
 });
+
+//TLS 관리자 계정 생성
+router.post('/tlsca/admin/create', async function(req, res) {
+
+  let token = req.headers.token;
+
+  const result = await jwt.verify(token); // verify 함수 호출
+  if (result < 0) {
+    res.status(401).json({
+      "result": false,
+      "message": "invalid token"
+    });
+    return;
+  }
+
+  let id = req.body.id; //관리자 아이디
+  let pw = req.body.password; //비밀번호
+
+  console.log('/work/node/tlsCaEnrollScript.sh ' + id + " "+ pw);
+  shell.exec('/work/node/tlsCaEnrollScript.sh ' + id + " "+ pw);
+  res.status(200).json({
+    "result": true,
+    "message": "TLS 관리자 계정 생성 성공",
+  });
+
+});
+
 
 router.post('/auth/ca/admin/login', function(req, res, next) {
 

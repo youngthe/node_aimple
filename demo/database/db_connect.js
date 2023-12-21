@@ -5,7 +5,7 @@ const conn = db.createConnection({
     port: 3306,
     user: 'root',
     password : 'test',
-    database : 'aimple'
+    database : 'cert'
 });
 
 module.exports = conn;
